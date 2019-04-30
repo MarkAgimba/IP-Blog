@@ -2,12 +2,14 @@ from . import main
 from ..models import User,Post,Comment
 from .. import db
 from .forms import PostForm,CommentForm
-from flask import render_template,request,redirect,url_for,abort
+from flask import render_template,redirect,url_for,abort
 from flask_login import login_required,current_user
 from ..email import mail_message
 import datetime
+import json 
+import requests
 
-#Views
+
 @main.route('/')
 def index():
     '''
@@ -16,8 +18,9 @@ def index():
     posts = Post.query.order_by(Post.date_posted.desc()).limit(3).all()
 
     title = 'Home - Welcome to the M.M.A Blog'
-
-    return render_template('index.html', title = title,posts = posts)
+    
+    random=requests.get('http://quotes.stormconsultancy.co.uk/random.json').json()
+    return render_template('index.html',index=index, title=title, post=post, random=random)
 
 @main.route('/user/<uname>')
 def profile(uname):
