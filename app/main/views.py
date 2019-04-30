@@ -19,34 +19,67 @@ def index():
 
     return render_template('index.html', title = title,posts = posts)
 
-@main.route('/post/new', methods =['GET','POST'])
+@main.route('/user/<uname>')
+def profile(uname):
+    user = User.query.filter_by(username = uname).first()
+    user_joined = user.date_joined.strftime('%b %d, %Y')
+
+    if user is None:
+        abort(404)
+
+    return render_template("profile/profile.html", user = user,date = user_joined)
+
+@main.route('/user/<uname>/update',methods = ['GET','POST'])
+@login_required
+def update_profile(uname):
+   user = User.query.filter_by(username = uname).first()
+   if user is None:
+       abort(404)
+
+   form = UpdateProfile()
+
+   if form.validate_on_submit():
+       user.bio = form.bio.data
+
+       db.session.add(user)
+       db.session.commit()
+
+       return redirect(url_for('.profile',uname=user.username))
+
+   return render_template('profile/update.html',form =form)
+
+
+@main.route('/user/<uname>/update/pic', methods=['POST'])
+@login_required
+def update_pic(uname):
+   user = User.query.filter_by(username = uname).first()
+
+   if 'photo' in request.files:
+       filename = photos.save(request.files['photo'])
+       path = f'photos/{filename}'
+       user.profile_pic_path = path
+       db.session.commit()
+
+   return redirect(url_for('main.profile',uname=uname))
+
+@main.route('/post/new', methods = ['GET','POST'])
 @login_required
 def new_post():
-    if current_user.role_id == 1:
-        post_form = PostForm()
-        if post_form.validate_on_submit():
-            title = post_form.title.data
-            text = post_form.text.data
+    post_form = PostForm()
+    if post_form.validate_on_submit():
+        title = post_form.title.data
+        text = post_form.text.data
+        
 
-            users = User.query.all()
+        # Updated post instance
+        new_post = Post(title=title,text=text)
 
-            # Update pitch instance
-            new_post = Post(title=title,text=text,post=current_user)
-
-            # Save post method
-            new_post.save_post()
-
-            for user in users:
-                if user.subscription:
-                    mail_message("New Post","email/new_post",user.email,user=user)
-
-            return redirect(url_for('.index'))
-
-    else:
+        # Save post method
+        new_post.save_post()
         return redirect(url_for('.index'))
 
     title = 'New post'
-    return render_template('new_post.html',title=title,post_form=post_form)
+    return render_template('new_post.html',title = title,post_form=post_form )
 
 @main.route('/posts')
 def all_posts():
@@ -58,6 +91,7 @@ def all_posts():
 
 @main.route('/post/<int:id>',methods=['GET','POST'])
 def post(id):
+
     form = CommentForm()
     post = Post.get_post(id)
 
@@ -123,3 +157,12 @@ def update_post(id):
         return redirect(url_for('main.post',id = post.id))
 
     return render_template('update.html',form = form)
+
+@main.route('/user/<uname>/blogs')
+def user_blogs(uname):
+    user = User.query.filter_by(username=uname).first()
+    blogs = Post.query.filter_by(user_id = user.id).all()
+    # blogs_count = Blog.count_blogs(uname)
+    user_joined = user.date_joined.strftime('%b %d, %Y')
+
+    return render_template("profile/blogs.html", user=user, posts=blogs,date = user_joined)

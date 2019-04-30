@@ -2,13 +2,25 @@
 {% import 'macros.html' as macro%}
 <!-- Content block -->
 {%block content%}
+
+<div class="jumbotron text-center" style="background-color: #463131; color: #fff; padding: 50px 25px;">
+    <h1><i><b>THE M.M.A BLOG</i></b></h1>
+</div>   
+<div class="container" style="padding-bottom: 30px;">
+    <a href="{{url_for('main.new_post')}}" class="btn btn-success">New post</a>
+</div>
+
 <div class="container" style="padding-bottom: 20px;">
 
 </div>
 <div class="container">
-    <h1>Recent posts</h1>
-    <a href="/subscribe/{{current_user.id}}" class="btn btn-success">Subscribe</a>
+    <h1><i>Newly Created Blogposts</i></h1>
+    
     <hr>
     {{macro.displayPosts(posts)}}
-</div>
+   
+   
+    <p>© 2019 Mark Agimba.  All rights reserved.</p>
+</div>    
 {%endblock%}
+
