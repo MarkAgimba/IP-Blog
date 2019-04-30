@@ -15,9 +15,6 @@ class Config:
     MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
 
-    # simple mde configs
-    SIMPLEMDE_JS_IIFE = True
-    SIMPLEMDE_USE_CDN = True
 
     UPLOADED_PHOTOS_DEST ='app/static/photos'
 
